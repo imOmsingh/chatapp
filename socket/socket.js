@@ -1,5 +1,5 @@
 const { Server } = require("socket.io");
-const io = new Server(9000, { 
+const io = new Server(3001, { 
     cors: {
         origin: '*',
         methods: ['GET', 'POST']
@@ -28,15 +28,25 @@ const removeUser = (socketId) =>{
 }
 
 io.on("connection", (socket)=>{
-    console.log("socket connnection")
+    console.log("connected")
     socket.on('addUser', (userId, userInfo) =>{
         addUser( userId, socket.id , userInfo)
         io.emit( 'getUser', users)
     })
 
-    socket.on('disconnect', ()=>{
+    socket.on('disconnection', ()=>{
         removeUser(socket.id)
         io.emit( 'getUser', users)
+    })
+
+    socket.on('sendMessage', ( message ) =>{
+
+        const findUser = users.some( u=> u.userId === message.reserverId);
+        
+        if(findUser){
+            console.log(message)
+            io.emit('getMessage',message)
+        }
     })
 
 })
